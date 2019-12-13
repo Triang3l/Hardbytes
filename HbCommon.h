@@ -72,6 +72,9 @@
 #error HbStaticAssert: No implementation for the current compiler.
 #endif
 
+// Argument not used in the implementation.
+#define HbUnused(argument) (void) (argument)
+
 // Unreachable branch, for assertions.
 #if defined(HbPlatform_Compiler_VisualC)
 #define HbUnreachable() __assume(0)

@@ -21,6 +21,9 @@
     <ClInclude Include="HbCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HbPara.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="HbReport.h">
       <Filter>Header Files</Filter>
     </ClInclude>

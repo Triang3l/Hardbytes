@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="HbCommon.h" />
+    <ClInclude Include="HbPara.h" />
     <ClInclude Include="HbReport.h" />
     <ClInclude Include="HbText.h" />
   </ItemGroup>
