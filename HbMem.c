@@ -60,18 +60,18 @@ void HbMem_Tag_Destroy(HbMem_Tag * const tag) {
 
 void * HbMem_Tag_AllocExplicit(HbMem_Tag * const tag, size_t const size, HbBool const required, char const * const originNameImmutable, unsigned const originLocation) {
 	HbReport_Assert_Assume(tag != NULL);
-	HbReport_Assert_Assume(originNameImmutable != NULL);
 	HbMem_Tag_Allocation * const allocation = (HbMem_Tag_Allocation *) malloc(sizeof(HbMem_Tag_Allocation) + size);
 	if (allocation == NULL) {
 		if (required) {
-			HbReport_Crash("Failed to allocate %zu bytes at %s:%u with tag %s.", size, originNameImmutable, originLocation, HbMem_Tag_GetName(tag));
+			HbReport_Crash("Failed to allocate %zu bytes at %s:%u with tag %s.",
+			               size, originNameImmutable != NULL ? originNameImmutable : "", originLocation, HbMem_Tag_GetName(tag));
 		}
 		return NULL;
 	}
 
 	allocation->tag = tag;
 	allocation->size = size;
-	allocation->originNameImmutable = originNameImmutable;
+	allocation->originNameImmutable = originNameImmutable != NULL ? originNameImmutable : "";
 	allocation->originLocation = originLocation;
 
 	HbPara_Mutex_Lock(&tag->allocationMutex);
