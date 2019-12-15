@@ -60,6 +60,8 @@ void HbReport_OS_Profile_MarkerV(uint32_t const color0xRGB, char const * const f
 // Not OS-specific.
 
 // Use `condition && "message"` to attach a message to an assertion.
+// Can't use HbUnreachable in builds with assertions enabled because it'd make the crash itself "unreachable",
+// and additional checks may be done for the unexpected case to display more info.
 #ifdef HbReport_Build_Assert
 #define HbReport_Assert_Checked(condition)\
 do {\
@@ -83,8 +85,8 @@ do {\
 } while (HbFalse)
 #endif
 
-HbNoReturn void HbReport_CrashInvoke(char const * const function, unsigned const line, char const * const format, ...);
-#define HbReport_Crash(format, ...) HbReport_CrashInvoke(__func__, __LINE__, (format), __VA_ARGS__)
+HbNoReturn void HbReport_CrashExplicit(char const * const function, unsigned const line, char const * const format, ...);
+#define HbReport_Crash(format, ...) HbReport_CrashExplicit(__func__, __LINE__, (format), __VA_ARGS__)
 
 #ifdef HbReport_Build_Message
 #define HbReport_MessageV HbReport_OS_MessageV

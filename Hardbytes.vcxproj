@@ -128,6 +128,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="HbCommon.h" />
+    <ClInclude Include="HbList.h" />
+    <ClInclude Include="HbMem.h" />
     <ClInclude Include="HbPara.h" />
     <ClInclude Include="HbReport.h" />
     <ClInclude Include="HbText.h" />
@@ -136,6 +138,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HbMem.c" />
     <ClCompile Include="HbReport.c" />
     <ClCompile Include="HbReport_OS_Microsoft.c" />
     <ClCompile Include="HbReport_OS_Microsoft_Profile.cpp" />

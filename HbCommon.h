@@ -3,12 +3,14 @@
 
 // The deepest-level header, which needs to be included in every header that doesn't include any other engine header.
 
-// General rule about basic types:
+// General rule about basic types (type choice is based primarily on semantics, not just size):
 // - unsigned - when simply need to count something abstract (like gameplay stats), at least 32 bits. No need to append "int".
 // - signed - when need to count something abstract, and its domain explicitly contains negative numbers, at least 32 bits. No need to append "int".
 // - char - only for ASCII strings (explicitly cast to uint8_t when inconsistency of signedness between compilers may matter).
-// - char for numbers or bytes, short, long, long long - never, unless required by an external interface! HbBool is the only exception because char is the smallest.
-// - (u)int8/16/32/64_t - when explicitly need a specific size: files/packets (uint8_t for bytes), atomics, bit fields.
+// - HbByte (unsigned char) - smallest addressable unit in both internal buffers and files/packets, for void * supporting sizeof/HbOffsetOf-derived offsets.
+// - HbBool (HbByte) - for binary states expressed as zero and non-zero values.
+// - char for numbers or bytes, short, long, long long - never, unless required by an external interface!
+// - (u)int8/16/32/64_t - when explicitly need a specific size: atomics, bit fields.
 // - (u)int_least8/16/32/64 - when need to support a specific range related to a log2, and it might be nice to tightly pack a value (in structs).
 // - (u)int_fast8/16/32/64 - when need to support a specific range related to a log2, and it's a local variable or something where packing is unnecessary; for large integers.
 // - size_t - data counts, indices within memory. Unless, like, some specifically uint32_t hash is used, use size_t instead of some uint32_t - 4 bytes is relatively nothing.
@@ -56,6 +58,15 @@
 #define HbPlatform_CPU_x86_AVX // On consoles - otherwise targeting SSE3.
 #endif
 
+// Allocation alignment (at least the size of the largest scalar).
+// For choosing the correct alignment of vector loads/stores primarily.
+// Bigger alignment should be done manually.
+#if HbPlatform_CPU_Bits < 64
+#define HbPlatform_AllocAlignment 8
+#else
+#define HbPlatform_AllocAlignment 16
+#endif
+
 // Operating system.
 #if defined(_WIN32)
 #define HbPlatform_OS_Microsoft
@@ -82,6 +93,9 @@
 #error HbUnreachable: No implementation for the current compiler.
 #endif
 
+// Shorter name for the smallest addressable unit.
+typedef unsigned char HbByte;
+
 // Alignment of entities - place HbAligned after the struct keyword.
 #if defined(HbPlatform_Compiler_VisualC)
 #define HbAligned(alignment) __declspec(align(alignment))
@@ -93,7 +107,7 @@
 #define HbCountOf(array) (sizeof(array) / sizeof((array)[0]))
 
 // Field offset.
-#define HbOffsetOf(type, field) ((size_t) (uint8_t const *) &(((type *) NULL)->field))
+#define HbOffsetOf(type, field) ((size_t) (HbByte const *) &(((type *) NULL)->field))
 
 // Force inlining.
 #if defined(HbPlatform_Compiler_VisualC)
@@ -119,7 +133,7 @@
 #endif
 
 // Boolean with a consistent size, if C/C++ interoperability is needed.
-typedef unsigned char HbBool;
+typedef HbByte HbBool;
 #define HbFalse ((HbBool) 0)
 #define HbTrue ((HbBool) 1)
 

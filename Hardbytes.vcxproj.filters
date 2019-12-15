@@ -21,6 +21,12 @@
     <ClInclude Include="HbCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HbList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HbMem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="HbPara.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -32,6 +38,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HbMem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="HbReport.c">
       <Filter>Source Files</Filter>
     </ClCompile>

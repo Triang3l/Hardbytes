@@ -1,6 +1,6 @@
 #include "HbReport.h"
 
-HbNoReturn void HbReport_CrashInvoke(char const * const function, unsigned const line, char const * const format, ...) {
+HbNoReturn void HbReport_CrashExplicit(char const * const function, unsigned const line, char const * const format, ...) {
 	va_list arguments;
 	va_start(arguments, format);
 	HbReport_OS_CrashV(function, line, format, arguments);

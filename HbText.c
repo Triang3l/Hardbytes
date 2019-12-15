@@ -69,7 +69,7 @@ size_t HbText_ClassifyUnicodeStream(void const * const data, size_t const size, 
 			}
 		}
 		if (size >= 3) {
-			uint8_t const * const potentialBOM = (uint8_t const *) data;
+			HbByte const * const potentialBOM = (HbByte const *) data;
 			if (potentialBOM[0] == HbTextU8_BOM_0 && potentialBOM[1] == HbTextU8_BOM_1 && potentialBOM[2] == HbTextU8_BOM_2) {
 				*isU16 = HbFalse;
 				*shouldSwapU16Endian = HbFalse;
