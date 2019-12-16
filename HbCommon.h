@@ -15,6 +15,9 @@
 // - (u)int_fast8/16/32/64 - when need to support a specific range related to a log2, and it's a local variable or something where packing is unnecessary; for large integers.
 // - size_t - data counts, indices within memory. Unless, like, some specifically uint32_t hash is used, use size_t instead of some uint32_t - 4 bytes is relatively nothing.
 // - wchar_t - never! Only Windows, where WCHAR (without wchar.h) can be used for internal strings, or reinterpreting can be done between WCHAR and the engine's UTF-16 text.
+// Struct/union member suffixes:
+// - _r - can be read directly externally, but not set without a proper setter (mutex locking may also be required).
+// - _i - internal to the subsystem the structure is a part of.
 
 #include <float.h> // Constants like FLT_MAX.
 #include <math.h> // fmin, fmax.

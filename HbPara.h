@@ -13,7 +13,7 @@ extern "C" {
  ********/
 typedef struct HbPara_Mutex {
 	#if defined(HbPlatform_OS_Microsoft)
-	CRITICAL_SECTION microsoftCriticalSection;
+	CRITICAL_SECTION microsoftCriticalSection_i;
 	#else
 	#error HbPara_Mutex: No implementation for the target OS.
 	#endif
@@ -22,7 +22,7 @@ HbForceInline void HbPara_Mutex_Init(HbPara_Mutex * const mutex, HbBool requireR
 	HbReport_Assert_Assume(mutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
 	HbUnused(requireRecursive); // Always recursive.
-	InitializeCriticalSection(&mutex->microsoftCriticalSection);
+	InitializeCriticalSection(&mutex->microsoftCriticalSection_i);
 	#else
 	#error HbPara_Mutex_Init: No implementation for the target OS.
 	#endif
@@ -30,7 +30,7 @@ HbForceInline void HbPara_Mutex_Init(HbPara_Mutex * const mutex, HbBool requireR
 HbForceInline void HbPara_Mutex_Shutdown(HbPara_Mutex * const mutex) {
 	HbReport_Assert_Assume(mutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	DeleteCriticalSection(&mutex->microsoftCriticalSection);
+	DeleteCriticalSection(&mutex->microsoftCriticalSection_i);
 	#else
 	#error HbPara_Mutex_Shutdown: No implementation for the target OS.
 	#endif
@@ -38,7 +38,7 @@ HbForceInline void HbPara_Mutex_Shutdown(HbPara_Mutex * const mutex) {
 HbForceInline void HbPara_Mutex_Lock(HbPara_Mutex * const mutex) {
 	HbReport_Assert_Assume(mutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	EnterCriticalSection(&mutex->microsoftCriticalSection);
+	EnterCriticalSection(&mutex->microsoftCriticalSection_i);
 	#else
 	#error HbPara_Mutex_Lock: No implementation for the target OS.
 	#endif
@@ -46,7 +46,7 @@ HbForceInline void HbPara_Mutex_Lock(HbPara_Mutex * const mutex) {
 HbForceInline void HbPara_Mutex_Unlock(HbPara_Mutex * const mutex) {
 	HbReport_Assert_Assume(mutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	LeaveCriticalSection(&mutex->microsoftCriticalSection);
+	LeaveCriticalSection(&mutex->microsoftCriticalSection_i);
 	#else
 	#error HbPara_Mutex_Unlock: No implementation for the target OS.
 	#endif
@@ -58,7 +58,7 @@ HbForceInline void HbPara_Mutex_Unlock(HbPara_Mutex * const mutex) {
  *********************/
 typedef struct HbPara_RWMutex {
 	#if defined(HbPlatform_OS_Microsoft)
-	SRWLOCK microsoftSRWLock;
+	SRWLOCK microsoftSRWLock_i;
 	#else
 	#error HbPara_RWMutex: No implementation for the target OS.
 	#endif
@@ -66,7 +66,7 @@ typedef struct HbPara_RWMutex {
 HbForceInline void HbPara_RWMutex_Init(HbPara_RWMutex * const rwMutex) {
 	HbReport_Assert_Assume(rwMutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	InitializeSRWLock(&rwMutex->microsoftSRWLock);
+	InitializeSRWLock(&rwMutex->microsoftSRWLock_i);
 	#else
 	#error HbPara_RWMutex_Init: No implementation for the target OS.
 	#endif
@@ -82,7 +82,7 @@ HbForceInline void HbPara_RWMutex_Shutdown(HbPara_RWMutex * const rwMutex) {
 HbForceInline void HbPara_RWMutex_LockRead(HbPara_RWMutex * const rwMutex) {
 	HbReport_Assert_Assume(rwMutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	AcquireSRWLockShared(&rwMutex->microsoftSRWLock);
+	AcquireSRWLockShared(&rwMutex->microsoftSRWLock_i);
 	#else
 	#error HbPara_RWMutex_LockRead: No implementation for the target OS.
 	#endif
@@ -90,7 +90,7 @@ HbForceInline void HbPara_RWMutex_LockRead(HbPara_RWMutex * const rwMutex) {
 HbForceInline void HbPara_RWMutex_UnlockRead(HbPara_RWMutex * const rwMutex) {
 	HbReport_Assert_Assume(rwMutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	ReleaseSRWLockShared(&rwMutex->microsoftSRWLock);
+	ReleaseSRWLockShared(&rwMutex->microsoftSRWLock_i);
 	#else
 	#error HbPara_RWMutex_UnlockRead: No implementation for the target OS.
 	#endif
@@ -98,7 +98,7 @@ HbForceInline void HbPara_RWMutex_UnlockRead(HbPara_RWMutex * const rwMutex) {
 HbForceInline void HbPara_RWMutex_LockWrite(HbPara_RWMutex * const rwMutex) {
 	HbReport_Assert_Assume(rwMutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	AcquireSRWLockExclusive(&rwMutex->microsoftSRWLock);
+	AcquireSRWLockExclusive(&rwMutex->microsoftSRWLock_i);
 	#else
 	#error HbPara_RWMutex_LockWrite: No implementation for the target OS.
 	#endif
@@ -106,7 +106,7 @@ HbForceInline void HbPara_RWMutex_LockWrite(HbPara_RWMutex * const rwMutex) {
 HbForceInline void HbPara_RWMutex_UnlockWrite(HbPara_RWMutex * const rwMutex) {
 	HbReport_Assert_Assume(rwMutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	ReleaseSRWLockExclusive(&rwMutex->microsoftSRWLock);
+	ReleaseSRWLockExclusive(&rwMutex->microsoftSRWLock_i);
 	#else
 	#error HbPara_RWMutex_UnlockWrite: No implementation for the target OS.
 	#endif
@@ -117,7 +117,7 @@ HbForceInline void HbPara_RWMutex_UnlockWrite(HbPara_RWMutex * const rwMutex) {
  *********************/
 typedef struct HbPara_Cond {
 	#if defined(HbPlatform_OS_Microsoft)
-	CONDITION_VARIABLE microsoftConditionVariable;
+	CONDITION_VARIABLE microsoftConditionVariable_i;
 	#else
 	#error HbPara_Cond: No implementation for the target OS.
 	#endif
@@ -125,7 +125,7 @@ typedef struct HbPara_Cond {
 HbForceInline void HbPara_Cond_Init(HbPara_Cond * const cond) {
 	HbReport_Assert_Assume(cond != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	InitializeConditionVariable(&cond->microsoftConditionVariable);
+	InitializeConditionVariable(&cond->microsoftConditionVariable_i);
 	#else
 	#error HbPara_Cond_Init: No implementation for the target OS.
 	#endif
@@ -141,7 +141,7 @@ HbForceInline void HbPara_Cond_Shutdown(HbPara_RWMutex * const cond) {
 HbForceInline void HbPara_Cond_NotifyOne(HbPara_Cond * const cond) {
 	HbReport_Assert_Assume(cond != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	WakeConditionVariable(&cond->microsoftConditionVariable);
+	WakeConditionVariable(&cond->microsoftConditionVariable_i);
 	#else
 	#error HbPara_Cond_NotifyOne: No implementation for the target OS.
 	#endif
@@ -149,7 +149,7 @@ HbForceInline void HbPara_Cond_NotifyOne(HbPara_Cond * const cond) {
 HbForceInline void HbPara_Cond_NotifyAll(HbPara_Cond * const cond) {
 	HbReport_Assert_Assume(cond != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	WakeAllConditionVariable(&cond->microsoftConditionVariable);
+	WakeAllConditionVariable(&cond->microsoftConditionVariable_i);
 	#else
 	#error HbPara_Cond_NotifyAll: No implementation for the target OS.
 	#endif
@@ -158,7 +158,7 @@ HbForceInline void HbPara_Cond_Wait(HbPara_Cond * const cond, HbPara_Mutex * con
 	HbReport_Assert_Assume(cond != NULL);
 	HbReport_Assert_Assume(mutex != NULL);
 	#if defined(HbPlatform_OS_Microsoft)
-	SleepConditionVariableCS(&cond->microsoftConditionVariable, &mutex->microsoftCriticalSection, INFINITE);
+	SleepConditionVariableCS(&cond->microsoftConditionVariable_i, &mutex->microsoftCriticalSection_i, INFINITE);
 	#else
 	#error HbPara_Cond_Wait: No implementation for the target OS.
 	#endif

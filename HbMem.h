@@ -12,34 +12,34 @@ extern "C" {
  ***********************************************/
 
 typedef struct HbMem_Tag_Root {
-	HbPara_Mutex tagListMutex;
-	struct HbMem_Tag * tagFirst;
-	struct HbMem_Tag * tagLast;
+	HbPara_Mutex tagListMutex_i;
+	struct HbMem_Tag * tagFirst_i;
+	struct HbMem_Tag * tagLast_i;
 } HbMem_Tag_Root;
 inline void HbMem_Tag_Root_Init(HbMem_Tag_Root * const tagRoot) {
 	HbReport_Assert_Assume(tagRoot != NULL);
-	HbPara_Mutex_Init(&tagRoot->tagListMutex, HbFalse);
-	tagRoot->tagFirst = tagRoot->tagLast = NULL;
+	HbPara_Mutex_Init(&tagRoot->tagListMutex_i, HbFalse);
+	tagRoot->tagFirst_i = tagRoot->tagLast_i = NULL;
 }
 void HbMem_Tag_Root_Shutdown(HbMem_Tag_Root * const tagRoot);
 
 typedef struct HbAligned(HbPlatform_AllocAlignment) HbMem_Tag_Allocation {
-	struct HbMem_Tag * tag;
-	struct HbMem_Tag_Allocation * tagAllocationPrev;
-	struct HbMem_Tag_Allocation * tagAllocationNext;
-	size_t size;
-	char const * originNameImmutable; // Function name generally, but can be something else (like, a library only providing file names).
-	unsigned originLocation; // File line generally.
+	struct HbMem_Tag * tag_i;
+	struct HbMem_Tag_Allocation * tagAllocationPrev_i;
+	struct HbMem_Tag_Allocation * tagAllocationNext_i;
+	size_t size_i;
+	char const * originNameImmutable_i; // Function name generally, but can be something else (like, a library only providing file names).
+	unsigned originLocation_i; // File line generally.
 } HbMem_Tag_Allocation;
 
 typedef struct HbMem_Tag {
-	HbMem_Tag_Root * tagRoot;
-	struct HbMem_Tag * tagPrev;
-	struct HbMem_Tag * tagNext;
-	HbPara_Mutex allocationMutex;
-	HbMem_Tag_Allocation * allocationFirst;
-	HbMem_Tag_Allocation * allocationLast;
-	size_t allocationTotalSize;
+	HbMem_Tag_Root * tagRoot_i;
+	struct HbMem_Tag * tagPrev_i;
+	struct HbMem_Tag * tagNext_i;
+	HbPara_Mutex allocationMutex_i;
+	HbMem_Tag_Allocation * allocationFirst_i;
+	HbMem_Tag_Allocation * allocationLast_i;
+	size_t allocationTotalSize_i;
 	// Followed by char name[].
 } HbMem_Tag;
 // Create instead of Init so tags themselves aren't (accidentally) created in tagged memory (and deallocated).
