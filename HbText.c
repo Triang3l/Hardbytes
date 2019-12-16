@@ -1,3 +1,4 @@
+#include "HbMath.h"
 #include "HbReport.h"
 #include "HbText.h"
 #include <stdio.h>
@@ -11,7 +12,7 @@ size_t HbTextA_FormatLengthV(char const * const format, va_list const arguments)
 	// vsnprintf returns a negative value in case of a format error.
 	signed const length = vsnprintf(NULL, 0, format, arguments);
 	HbReport_Assert_Checked(length >= 0);
-	return (size_t) HbMaxS(length, 0);
+	return (size_t) HbMath_MaxS(length, 0);
 }
 
 size_t HbTextA_FormatLength(char const * const format, ...) {
@@ -34,7 +35,7 @@ size_t HbTextA_FormatV(char * const target, size_t const targetBufferSize, size_
 	// vsnprintf returns a negative value in case of a format error without writing anything, treat that as nothing written.
 	signed const length = vsnprintf(targetWithOffset, targetBufferRemaining, format, arguments);
 	HbReport_Assert_Checked(length >= 0);
-	size_t const written = HbMinSize((size_t) HbMaxS(length, 0), targetBufferRemaining - 1);
+	size_t const written = HbMath_MinSize((size_t) HbMath_MaxS(length, 0), targetBufferRemaining - 1);
 	// Terminate in case the text was too long or there was a format error.
 	targetWithOffset[written] = '\0';
 	return written;

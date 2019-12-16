@@ -19,8 +19,6 @@
 // - _r - can be read directly externally, but not set without a proper setter (mutex locking may also be required).
 // - _i - internal to the subsystem the structure is a part of.
 
-#include <float.h> // Constants like FLT_MAX.
-#include <math.h> // fmin, fmax.
 #include <stdarg.h>
 #include <stdint.h> // Integers of specific size and their limits.
 #include <stdlib.h> // NULL, common functions like abs.
@@ -152,33 +150,6 @@ extern "C" {
 #else
 #error HbByteSwap: No implementation for the current compiler.
 #endif
-
-// Aligning values.
-#define HbAlign(value, alignment) (((value) + ((alignment) - 1u)) & ~((alignment) - 1u))
-HbForceInline unsigned HbAlignU(unsigned const value, unsigned const alignment) {
-	unsigned const mask = alignment - 1;
-	return (value + mask) & ~mask;
-}
-HbForceInline size_t HbAlignSize(size_t const value, size_t const alignment) {
-	size_t const mask = alignment - 1;
-	return (value + mask) & ~mask;
-}
-
-// Number min/max - for runtime floating-point, use fmin/fmax because of NaN handling and minss/maxss.
-// The generic versions are for compile-time constants primarily because they evaluate arguments multiple times.
-#define HbMin(a, b) ((a) < (b) ? (a) : (b))
-HbForceInline unsigned HbMinU(unsigned const a, unsigned const b) { return HbMin(a, b); }
-HbForceInline signed HbMinS(signed const a, signed const b) { return HbMin(a, b); }
-HbForceInline size_t HbMinSize(size_t const a, size_t const b) { return HbMin(a, b); }
-#define HbMax(a, b) ((a) > (b) ? (a) : (b))
-HbForceInline unsigned HbMaxU(unsigned const a, unsigned const b) { return HbMax(a, b); }
-HbForceInline signed HbMaxS(signed const a, signed const b) { return HbMax(a, b); }
-HbForceInline size_t HbMaxSize(size_t const a, size_t const b) { return HbMax(a, b); }
-#define HbClamp(value, low, high) (((value) > (high)) ? (high) : (((value) < (low)) ? (low) : (value)))
-HbForceInline unsigned HbClampU(unsigned const value, unsigned const low, unsigned const high) { return HbClamp(value, low, high); }
-HbForceInline signed HbClampS(signed const value, signed const low, signed const high) { return HbClamp(value, low, high); }
-HbForceInline size_t HbClampSize(size_t const value, size_t const low, size_t const high) { return HbClamp(value, low, high); }
-#define HbClampF(value, low, high) fminf(high, fmaxf(low, value))
 
 #ifdef __cplusplus
 }

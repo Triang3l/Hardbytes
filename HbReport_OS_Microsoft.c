@@ -1,5 +1,6 @@
 #include "HbCommon.h"
 #ifdef HbPlatform_OS_Microsoft
+#include "HbMath.h"
 #include "HbReport.h"
 #include "HbText.h"
 #include <stdio.h>
@@ -10,9 +11,9 @@
 #ifdef HbReport_Build_Assert
 HbNoReturn void HbReport_OS_AssertCrash(char const * const function, unsigned const line, char const * const statement, HbBool isAssumption) {
 	char message[1024];
-	message[HbMinSize((size_t) HbMaxS(snprintf(message, HbCountOf(message),
-	                                           "%s:%u (%s): %s", function, line, isAssumption ? "strictly assumed" : "undesirable", statement),
-	                                  0), HbCountOf(message) - 1)] = '\0';
+	message[HbMath_MinSize((size_t) HbMath_MaxS(snprintf(message, HbCountOf(message),
+	                                                     "%s:%u (%s): %s", function, line, isAssumption ? "strictly assumed" : "undesirable", statement),
+	                                            0), HbCountOf(message) - 1)] = '\0';
 	OutputDebugStringA("Hardbytes assertion failed: ");
 	OutputDebugStringA(message);
 	OutputDebugStringA("\n");
@@ -27,8 +28,8 @@ HbNoReturn void HbReport_OS_AssertCrash(char const * const function, unsigned co
 #endif
 
 HbNoReturn void HbReport_OS_CrashV(char const * const function, unsigned const line, char const * const format, va_list const arguments) {
-	size_t const prefixLength = (size_t) HbMaxS(snprintf(NULL, 0, "%s:%u: ", function, line), 0);
-	size_t const messageLength = HbMinSize((size_t) HbMaxS(vsnprintf(NULL, 0, format, arguments), 0), 1023);
+	size_t const prefixLength = (size_t) HbMath_MaxS(snprintf(NULL, 0, "%s:%u: ", function, line), 0);
+	size_t const messageLength = HbMath_MinSize((size_t) HbMath_MaxS(vsnprintf(NULL, 0, format, arguments), 0), 1023);
 	char * const message = HbStackAlloc(char, prefixLength + messageLength + 1);
 	snprintf(message, prefixLength + 1, "%s:%u: ", function, line);
 	vsnprintf(message + prefixLength, messageLength + 1, format, arguments);

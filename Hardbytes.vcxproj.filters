@@ -24,6 +24,9 @@
     <ClInclude Include="HbList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HbMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="HbMem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
