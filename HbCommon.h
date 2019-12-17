@@ -4,20 +4,20 @@
 // The deepest-level header, which needs to be included in every header that doesn't include any other engine header.
 
 // General rule about basic types (type choice is based primarily on semantics, not just size):
-// - unsigned - when simply need to count something abstract (like gameplay stats), at least 32 bits. No need to append "int".
-// - signed - when need to count something abstract, and its domain explicitly contains negative numbers, at least 32 bits. No need to append "int".
+// - Signed types only when values can be meaningfully negative, unsigned types in all other cases.
+// - (u)int_least8/16/32/64 - when need to support a specific range, and it might be nice to tightly pack a value (in structs).
+// - (u)int_fast8/16/32/64 - when need to support a specific range, and it's a local variable or something where packing is unnecessary.
+// - (u)int8/16/32/64_t - when explicitly need a specific size: atomics, bit fields, serialized data.
+// - size_t - data counts, indices within memory. Unless, like, some specifically uint32_t hash is used, use size_t instead of some uint32_t - 4 bytes is relatively nothing.
 // - char - only for ASCII strings (explicitly cast to uint8_t when inconsistency of signedness between compilers may matter).
 // - HbByte (unsigned char) - smallest addressable unit in both internal buffers and files/packets, for void * supporting sizeof/HbOffsetOf-derived offsets.
 // - HbBool (HbByte) - for binary states expressed as zero and non-zero values.
+// - (un)signed - rarely, for abstract values when their range is not strictly defined, but more or less small, mostly for external interfaces. No need to append "int".
 // - char for numbers or bytes, short, long, long long - never, unless required by an external interface!
-// - (u)int8/16/32/64_t - when explicitly need a specific size: atomics, bit fields.
-// - (u)int_least8/16/32/64 - when need to support a specific range related to a log2, and it might be nice to tightly pack a value (in structs).
-// - (u)int_fast8/16/32/64 - when need to support a specific range related to a log2, and it's a local variable or something where packing is unnecessary; for large integers.
-// - size_t - data counts, indices within memory. Unless, like, some specifically uint32_t hash is used, use size_t instead of some uint32_t - 4 bytes is relatively nothing.
 // - wchar_t - never! Only Windows, where WCHAR (without wchar.h) can be used for internal strings, or reinterpreting can be done between WCHAR and the engine's UTF-16 text.
 // Struct/union member suffixes:
 // - _r - can be read directly externally, but not set without a proper setter (mutex locking may also be required).
-// - _i - internal to the subsystem the structure is a part of.
+// - _i - internal to the subsystem the structure is a part of. May also apply to entire types when all references to them are _i.
 
 #include <stdarg.h>
 #include <stdint.h> // Integers of specific size and their limits.
