@@ -16,7 +16,6 @@ size_t HbTextA_FormatLengthV(char const * const format, va_list const arguments)
 }
 
 size_t HbTextA_FormatLength(char const * const format, ...) {
-	HbReport_Assert_Assume(format != NULL);
 	va_list arguments;
 	va_start(arguments, format);
 	size_t const length = HbTextA_FormatLengthV(format, arguments);
@@ -42,8 +41,6 @@ size_t HbTextA_FormatV(char * const target, size_t const targetBufferSize, size_
 }
 
 size_t HbTextA_Format(char * const target, size_t const targetBufferSize, size_t const targetOffset, char const * const format, ...) {
-	HbReport_Assert_Assume(target != NULL && "Use HbTextA_FormatLength to calculate the allocation size.");
-	HbReport_Assert_Assume(format != NULL);
 	va_list arguments;
 	va_start(arguments, format);
 	size_t const written = HbTextA_FormatV(target, targetBufferSize, targetOffset, format, arguments);

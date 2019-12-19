@@ -9,7 +9,6 @@ HbNoReturn void HbReport_CrashExplicit(char const * const function, unsigned con
 
 #ifdef HbReport_Build_Message
 void HbReport_Message(char const * const format, ...) {
-	HbReport_Assert_Assume(format != NULL);
 	va_list arguments;
 	va_start(arguments, format);
 	HbReport_MessageV(format, arguments);
@@ -19,7 +18,6 @@ void HbReport_Message(char const * const format, ...) {
 
 #ifdef HbReport_Build_Profile
 void HbReport_Profile_Span_Begin(uint32_t const color0xRGB, char const * const format, ...) {
-	HbReport_Assert_Assume(format != NULL);
 	va_list arguments;
 	va_start(arguments, format);
 	HbReport_Profile_Span_BeginV(color0xRGB, format, arguments);
@@ -27,7 +25,6 @@ void HbReport_Profile_Span_Begin(uint32_t const color0xRGB, char const * const f
 }
 
 void HbReport_Profile_Marker(uint32_t const color0xRGB, char const * const format, ...) {
-	HbReport_Assert_Assume(format != NULL);
 	va_list arguments;
 	va_start(arguments, format);
 	HbReport_Profile_MarkerV(color0xRGB, format, arguments);

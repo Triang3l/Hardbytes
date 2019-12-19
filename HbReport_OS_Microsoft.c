@@ -48,7 +48,6 @@ HbNoReturn void HbReport_OS_CrashV(char const * const function, unsigned const l
 
 #ifdef HbReport_Build_Message
 void HbReport_OS_MessageV(char const * const format, va_list const arguments) {
-	HbReport_Assert_Assume(format != NULL);
 	char message[1024];
 	HbTextA_FormatV(message, HbCountOf(message), 0, format, arguments);
 	OutputDebugStringA(message);

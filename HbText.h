@@ -169,8 +169,6 @@ inline size_t HbTextU8_CharElemCount(HbTextU32 const character) {
 // It should be HbTextU8_MaxCharElems for null-terminated strings.
 HbTextU32 HbTextU8_NextCharInBuffer(HbTextU8 const * * const cursor, size_t const maxElems);
 HbForceInline HbTextU32 HbTextU8_NextChar(HbTextU8 const * * const cursor) {
-	HbReport_Assert_Assume(cursor != NULL);
-	HbReport_Assert_Assume(*cursor != NULL);
 	return HbTextU8_NextCharInBuffer(cursor, HbTextU8_MaxCharElems);
 }
 #define HbTextU8_LengthElems HbTextA_Length
@@ -221,8 +219,6 @@ size_t HbTextU8_FromU16(HbTextU8 * const target, size_t const targetBufferSizeEl
 // It should be HbTextU16_MaxCharElems for null-terminated strings.
 HbTextU32 HbTextU16_NextCharInBuffer(HbTextU16 const * * const cursor, size_t const maxElems, HbBool const swapEndian);
 HbForceInline HbTextU32 HbTextU16_NextChar(HbTextU16 const * * const cursor, HbBool const swapEndian) {
-	HbReport_Assert_Assume(cursor != NULL);
-	HbReport_Assert_Assume(*cursor != NULL);
 	return HbTextU16_NextCharInBuffer(cursor, HbTextU16_MaxCharElems, swapEndian);
 }
 

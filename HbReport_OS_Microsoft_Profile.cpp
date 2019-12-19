@@ -5,7 +5,6 @@
 #include <pix3.h>
 
 void HbReport_OS_Profile_Span_BeginV(uint32_t const color0xRGB, char const * const format, va_list const arguments) {
-	HbReport_Assert_Assume(format != NULL);
 	size_t const nameBufferSize = HbTextA_FormatLengthV(format, arguments) + 1;
 	char * const name = HbStackAlloc(char, nameBufferSize);
 	HbTextA_FormatV(name, nameBufferSize, 0, format, arguments);
@@ -17,7 +16,6 @@ void HbReport_OS_Profile_Span_End() {
 }
 
 void HbReport_OS_Profile_MarkerV(uint32_t const color0xRGB, char const * const format, va_list const arguments) {
-	HbReport_Assert_Assume(format != NULL);
 	size_t const nameBufferSize = HbTextA_FormatLengthV(format, arguments) + 1;
 	char * const name = HbStackAlloc(char, nameBufferSize);
 	HbTextA_FormatV(name, nameBufferSize, 0, format, arguments);

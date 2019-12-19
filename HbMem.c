@@ -4,6 +4,10 @@
 #include "HbReport.h"
 #include "HbText.h"
 
+/*********************************
+ * Tagged heap memory allocations
+ *********************************/
+
 void HbMem_Tag_Root_Shutdown(HbMem_Tag_Root * const tagRoot) {
 	HbReport_Assert_Assume(tagRoot != NULL);
 	#if defined(HbReport_Build_Assert) && defined(HbReport_Build_Message)
@@ -82,6 +86,21 @@ void * HbMem_Tag_AllocExplicit(HbMem_Tag * const tag, size_t const size, HbBool 
 	return allocation + 1;
 }
 
+void * HbMem_Tag_AllocElements(HbMem_Tag * const tag, size_t const elementSize, size_t count, HbBool const required,
+                               char const * const originNameImmutable, unsigned const originLocation) {
+	HbReport_Assert_Assume(tag != NULL);
+	HbReport_Assert_Assume(elementSize != 0);
+	size_t const maxCount = SIZE_MAX / elementSize;
+	if (count > maxCount) {
+		if (required) {
+			HbReport_Crash("Too many %zu-sized elements (%zu, max %zu) requested at %s:%u for allocation with tag %s.",
+			               elementSize, count, maxCount, originNameImmutable != NULL ? originNameImmutable : "", originLocation, HbMem_Tag_GetName(tag));
+		}
+		return NULL;
+	}
+	return HbMem_Tag_AllocExplicit(tag, elementSize * count, required, originNameImmutable, originLocation);
+}
+
 HbBool HbMem_Tag_ReallocExplicit(void * * const buffer, size_t const size, HbBool const required) {
 	HbReport_Assert_Assume(buffer != NULL);
 	HbReport_Assert_Assume(*buffer != NULL);
@@ -115,6 +134,23 @@ HbBool HbMem_Tag_ReallocExplicit(void * * const buffer, size_t const size, HbBoo
 
 	*buffer = newAllocation + 1;
 	return HbTrue;
+}
+
+HbBool HbMem_Tag_ReallocElements(void * * const buffer, size_t const elementSize, size_t count, HbBool const required) {
+	HbReport_Assert_Assume(buffer != NULL);
+	HbReport_Assert_Assume(*buffer != NULL);
+	HbReport_Assert_Assume(elementSize != 0);
+	size_t const maxCount = SIZE_MAX / elementSize;
+	if (count > maxCount) {
+		if (required) {
+			HbMem_Tag_Allocation * const allocation = (HbMem_Tag_Allocation *) *buffer - 1;
+			HbReport_Crash("Too many %zu-sized elements (%zu, max %zu) requested for reallocation of %zu bytes originally allocated at %s:%u with tag %s.",
+			               elementSize, count, maxCount, allocation->size_r,
+			               allocation->originNameImmutable_r, allocation->originLocation_r, HbMem_Tag_GetName(allocation->tag_r));
+		}
+		return HbFalse;
+	}
+	return HbMem_Tag_ReallocExplicit(buffer, elementSize * count, required);
 }
 
 void HbMem_Tag_Free(void * const buffer) {
