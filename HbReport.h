@@ -86,7 +86,7 @@ do {\
 #endif
 
 HbNoReturn void HbReport_CrashExplicit(char const * const function, unsigned const line, char const * const format, ...);
-#define HbReport_Crash(format, ...) HbReport_CrashExplicit(__func__, __LINE__, (format), __VA_ARGS__)
+#define HbReport_Crash(format, ...) HbReport_CrashExplicit(__func__, __LINE__, format, __VA_ARGS__)
 
 #ifdef HbReport_Build_Message
 #define HbReport_MessageV HbReport_OS_MessageV

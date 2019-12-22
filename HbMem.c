@@ -1,4 +1,5 @@
 #include "HbList.h"
+#include "HbMath.h"
 #include "HbMem.h"
 #include "HbPara.h"
 #include "HbReport.h"
@@ -86,10 +87,11 @@ void * HbMem_Tag_AllocExplicit(HbMem_Tag * const tag, size_t const size, HbBool 
 	return allocation + 1;
 }
 
-void * HbMem_Tag_AllocElements(HbMem_Tag * const tag, size_t const elementSize, size_t count, HbBool const required,
-                               char const * const originNameImmutable, unsigned const originLocation) {
+void * HbMem_Tag_AllocElementsExplicit(HbMem_Tag * const tag, size_t const elementSize, size_t count, HbBool const required,
+                                       char const * const originNameImmutable, unsigned const originLocation) {
 	HbReport_Assert_Assume(tag != NULL);
 	HbReport_Assert_Assume(elementSize != 0);
+	#ifdef HbMem_SizeMaxChecksNeeded
 	size_t const maxCount = SIZE_MAX / elementSize;
 	if (count > maxCount) {
 		if (required) {
@@ -98,6 +100,7 @@ void * HbMem_Tag_AllocElements(HbMem_Tag * const tag, size_t const elementSize, 
 		}
 		return NULL;
 	}
+	#endif
 	return HbMem_Tag_AllocExplicit(tag, elementSize * count, required, originNameImmutable, originLocation);
 }
 
@@ -136,10 +139,11 @@ HbBool HbMem_Tag_ReallocExplicit(void * * const buffer, size_t const size, HbBoo
 	return HbTrue;
 }
 
-HbBool HbMem_Tag_ReallocElements(void * * const buffer, size_t const elementSize, size_t count, HbBool const required) {
+HbBool HbMem_Tag_ReallocElementsExplicit(void * * const buffer, size_t const elementSize, size_t count, HbBool const required) {
 	HbReport_Assert_Assume(buffer != NULL);
 	HbReport_Assert_Assume(*buffer != NULL);
 	HbReport_Assert_Assume(elementSize != 0);
+	#ifdef HbMem_SizeMaxChecksNeeded
 	size_t const maxCount = SIZE_MAX / elementSize;
 	if (count > maxCount) {
 		if (required) {
@@ -150,6 +154,7 @@ HbBool HbMem_Tag_ReallocElements(void * * const buffer, size_t const elementSize
 		}
 		return HbFalse;
 	}
+	#endif
 	return HbMem_Tag_ReallocExplicit(buffer, elementSize * count, required);
 }
 
@@ -164,4 +169,60 @@ void HbMem_Tag_Free(void * const buffer) {
 	HbPara_Mutex_Unlock(&tag->allocationMutex_r);
 
 	free(allocation);
+}
+
+/***********************
+ * Dynamic-length array
+ ***********************/
+
+size_t HbMem_DynArray_GetCapacityForGrowingExplicit(size_t const elementSize, size_t const currentCapacity, size_t const neededSize) {
+	HbReport_Assert_Assume(elementSize != 0);
+	if (neededSize <= currentCapacity) {
+		return currentCapacity;
+	}
+	#ifdef HbMem_SizeMaxChecksNeeded
+	size_t const maxCapacity = SIZE_MAX / elementSize;
+	if (maxCapacity == 0) {
+		return 0;
+	}
+	if (neededSize >= maxCapacity) {
+		return maxCapacity;
+	}
+	#endif
+	// Grow by a factor of 1.5 (2 doesn't theoretically allow reuse of allocated memory).
+	size_t const addition = neededSize / 2;
+	#ifdef HbMem_SizeMaxChecksNeeded
+	if (maxCapacity - neededSize < addition) {
+		return neededSize;
+	}
+	#endif
+	// Don't do many reallocations in the beginning if elements are tiny.
+	return HbMath_MaxSize(neededSize + addition, HbMem_Tag_RecommendedMinAlloc / elementSize);
+}
+
+void HbMem_DynArray_ReserveExactly(HbMem_DynArray * const array, size_t const capacity, HbBool const trim) {
+	HbReport_Assert_Assume(array != NULL);
+	size_t const neededCapacity = HbMath_MaxSize(capacity, array->count_r);
+	if (neededCapacity == array->capacity_r || (!trim && neededCapacity < array->capacity_r)) {
+		return;
+	}
+	#ifdef HbMem_SizeMaxChecksNeeded
+	size_t const maxCapacity = SIZE_MAX / array->elementSize_r;
+	HbReport_Assert_Checked(neededCapacity <= maxCapacity);
+	if (neededCapacity > maxCapacity) {
+		HbReport_Crash("Too many elements of size %zu requested (%zu, max %zu) for the array created at %s:%u.",
+		               array->elementSize_r, neededCapacity, maxCapacity, array->originNameImmutable_r, array->originLocation_r);
+	}
+	#endif
+	if (array->capacity_r != 0) {
+		if (neededCapacity == 0) {
+			HbMem_Tag_Free(array->data_r);
+		} else {
+			HbMem_Tag_ReallocElementsExplicit((void * *) &array->data_r, array->elementSize_r, neededCapacity, HbTrue);
+		}
+	} else {
+		array->data_r = HbMem_Tag_AllocElementsExplicit(array->tag_r, array->elementSize_r, neededCapacity, HbTrue,
+		                                                array->originNameImmutable_r, array->originLocation_r);
+	}
+	array->capacity_r = neededCapacity;
 }
