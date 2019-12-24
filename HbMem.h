@@ -149,7 +149,30 @@ HbForceInline void HbMem_DynArray_ResizeForGrowing(HbMem_DynArray * const array,
 	array->count_r = count;
 }
 
-inline void HbMem_DynArray_MakeGap(HbMem_DynArray * const array, size_t const offset, size_t const count) {
+inline void HbMem_DynArray_MakeGapInUnsorted(HbMem_DynArray * const array, size_t const offset, size_t const count) {
+	HbReport_Assert_Assume(array != NULL);
+	HbReport_Assert_Assume(offset <= array->count_r);
+	if (array->capacity_r - array->count_r < count) {
+		#ifdef HbMem_SizeMaxChecksNeeded
+		size_t const countValuesLeft = SIZE_MAX / array->elementSize_r - array->count_r;
+		HbReport_Assert_Checked(countValuesLeft >= count);
+		if (countValuesLeft < count) {
+			HbReport_Crash("Too many elements of size %zu requested (%zu, max %zu) for insertion into the array created at %s:%u.",
+			               array->elementSize_r, count, countValuesLeft, array->originNameImmutable_r, array->originLocation_r);
+		}
+		#endif
+		HbMem_DynArray_ReserveForGrowing(array, array->count_r + count);
+	}
+	size_t const countToMove = HbMath_MinSize(count, array->count_r - offset);
+	array->count_r += count;
+	if (countToMove != 0) { // May even have an empty array at this point (if count is zero), and memcpy is undefined for NULL.
+		memcpy((HbByte *) array->data_r + array->elementSize_r * (array->count_r - countToMove),
+		       (HbByte *) array->data_r + array->elementSize_r * offset,
+		       array->elementSize_r * countToMove);
+	}
+}
+
+inline void HbMem_DynArray_MakeGapInSorted(HbMem_DynArray * const array, size_t const offset, size_t const count) {
 	HbReport_Assert_Assume(array != NULL);
 	HbReport_Assert_Assume(offset <= array->count_r);
 	if (array->capacity_r - array->count_r < count) {
@@ -165,7 +188,7 @@ inline void HbMem_DynArray_MakeGap(HbMem_DynArray * const array, size_t const of
 	}
 	size_t const countToMove = array->count_r - offset;
 	array->count_r += count;
-	if (countToMove != 0) { // May even have an empty array at this point (if count is zero), and memmove is undefined for NULL.
+	if (countToMove != 0) {
 		memmove((HbByte *) array->data_r + array->elementSize_r * (offset + count),
 		        (HbByte *) array->data_r + array->elementSize_r * offset,
 		        array->elementSize_r * countToMove);
@@ -193,7 +216,7 @@ inline void HbMem_DynArray_RemoveFromUnsorted(HbMem_DynArray * const array, size
 	HbReport_Assert_Assume(offset <= array->count_r);
 	HbReport_Assert_Assume(count <= array->count_r - offset);
 	size_t const countToMove = HbMath_MinSize(count, array->count_r - (offset + count));
-	if (countToMove != 0) { // May even have an empty array at this point (if count is zero), and memcpy is undefined for NULL.
+	if (countToMove != 0) {
 		memcpy((HbByte *) array->data_r + array->elementSize_r * offset,
 		       (HbByte *) array->data_r + array->elementSize_r * (array->count_r - countToMove),
 		       array->elementSize_r * countToMove);
@@ -206,7 +229,7 @@ inline void HbMem_DynArray_RemoveFromSorted(HbMem_DynArray * const array, size_t
 	HbReport_Assert_Assume(offset <= array->count_r);
 	HbReport_Assert_Assume(count <= array->count_r - offset);
 	size_t const countToMove = array->count_r - (offset + count);
-	if (countToMove != 0) { // May even have an empty array at this point (if count is zero), and memmove is undefined for NULL.
+	if (countToMove != 0) {
 		memmove((HbByte *) array->data_r + array->elementSize_r * offset,
 		        (HbByte *) array->data_r + array->elementSize_r * (offset + count),
 		        array->elementSize_r * countToMove);
