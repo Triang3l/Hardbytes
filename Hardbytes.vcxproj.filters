@@ -36,12 +36,18 @@
     <ClInclude Include="HbReport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HbSort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="HbText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HbMem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HbMem_FibAlloc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HbReport.c">

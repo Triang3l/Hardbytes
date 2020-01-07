@@ -29,14 +29,14 @@ HbMem_Tag * HbMem_Tag_Create(HbMem_Tag_Root * const tagRoot, char const * const 
 		HbReport_Crash("Failed to allocate memory for a memory tag.");
 	}
 
-	tag->tagRoot_r = tagRoot;
+	tag->tagRoot_e = tagRoot;
 	HbPara_Mutex_Init(&tag->allocationMutex_r, HbFalse);
 	tag->allocationFirst_r = tag->allocationLast_r = NULL;
 	tag->allocationTotalSize_r = 0;
 	HbTextA_Copy((char *) (tag + 1), nameSize, 0, name != NULL ? name : "");
 
 	HbPara_Mutex_Lock(&tagRoot->tagListMutex_r);
-	HbList_2Way_Append(tag, tagRoot->tagFirst_r, tagRoot->tagLast_r, tagPrev_r, tagNext_r);
+	HbList_2WayLine_Append(tag, tagRoot->tagFirst_r, tagRoot->tagLast_r, tagPrev_r, tagNext_r);
 	HbPara_Mutex_Unlock(&tagRoot->tagListMutex_r);
 
 	return tag;
@@ -54,9 +54,9 @@ void HbMem_Tag_Destroy(HbMem_Tag * const tag) {
 	#endif
 	HbReport_Assert_Assume(tag->allocationFirst_r == NULL);
 
-	HbMem_Tag_Root * const tagRoot = tag->tagRoot_r;
+	HbMem_Tag_Root * const tagRoot = tag->tagRoot_e;
 	HbPara_Mutex_Lock(&tagRoot->tagListMutex_r);
-	HbList_2Way_Unlink(tag, tagRoot->tagFirst_r, tagRoot->tagLast_r, tagPrev_r, tagNext_r);
+	HbList_2WayLine_Unlink(tag, tagRoot->tagFirst_r, tagRoot->tagLast_r, tagPrev_r, tagNext_r);
 	HbPara_Mutex_Unlock(&tagRoot->tagListMutex_r);
 
 	HbPara_Mutex_Shutdown(&tag->allocationMutex_r);
@@ -74,13 +74,13 @@ void * HbMem_Tag_AllocExplicit(HbMem_Tag * const tag, size_t const size, HbBool 
 		return NULL;
 	}
 
-	allocation->tag_r = tag;
+	allocation->tag_e = tag;
 	allocation->size_r = size;
 	allocation->originNameImmutable_r = originNameImmutable != NULL ? originNameImmutable : "";
 	allocation->originLocation_r = originLocation;
 
 	HbPara_Mutex_Lock(&tag->allocationMutex_r);
-	HbList_2Way_Append(allocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
+	HbList_2WayLine_Append(allocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
 	tag->allocationTotalSize_r += size;
 	HbPara_Mutex_Unlock(&tag->allocationMutex_r);
 
@@ -108,11 +108,11 @@ HbBool HbMem_Tag_ReallocExplicit(void * * const buffer, size_t const size, HbBoo
 	HbReport_Assert_Assume(buffer != NULL);
 	HbReport_Assert_Assume(*buffer != NULL);
 	HbMem_Tag_Allocation * const allocation = (HbMem_Tag_Allocation *) *buffer - 1;
-	HbMem_Tag * const tag = allocation->tag_r;
+	HbMem_Tag * const tag = allocation->tag_e;
 
 	// Remove the allocation from the list not to hold the mutex during the allocation because the element's address may change.
 	HbPara_Mutex_Lock(&tag->allocationMutex_r);
-	HbList_2Way_Unlink(allocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
+	HbList_2WayLine_Unlink(allocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
 	tag->allocationTotalSize_r -= allocation->size_r;
 	HbPara_Mutex_Unlock(&tag->allocationMutex_r);
 
@@ -123,7 +123,7 @@ HbBool HbMem_Tag_ReallocExplicit(void * * const buffer, size_t const size, HbBoo
 			               allocation->size_r, size, allocation->originNameImmutable_r, allocation->originLocation_r, HbMem_Tag_GetName(tag));
 		}
 		HbPara_Mutex_Lock(&tag->allocationMutex_r);
-		HbList_2Way_Append(allocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
+		HbList_2WayLine_Append(allocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
 		tag->allocationTotalSize_r += allocation->size_r;
 		HbPara_Mutex_Unlock(&tag->allocationMutex_r);
 		return HbFalse;
@@ -131,7 +131,7 @@ HbBool HbMem_Tag_ReallocExplicit(void * * const buffer, size_t const size, HbBoo
 	newAllocation->size_r = size;
 
 	HbPara_Mutex_Lock(&tag->allocationMutex_r);
-	HbList_2Way_Append(newAllocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
+	HbList_2WayLine_Append(newAllocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
 	tag->allocationTotalSize_r += size;
 	HbPara_Mutex_Unlock(&tag->allocationMutex_r);
 
@@ -150,7 +150,7 @@ HbBool HbMem_Tag_ReallocElementsExplicit(void * * const buffer, size_t const ele
 			HbMem_Tag_Allocation * const allocation = (HbMem_Tag_Allocation *) *buffer - 1;
 			HbReport_Crash("Too many %zu-sized elements (%zu, max %zu) requested for reallocation of %zu bytes originally allocated at %s:%u with tag %s.",
 			               elementSize, count, maxCount, allocation->size_r,
-			               allocation->originNameImmutable_r, allocation->originLocation_r, HbMem_Tag_GetName(allocation->tag_r));
+			               allocation->originNameImmutable_r, allocation->originLocation_r, HbMem_Tag_GetName(allocation->tag_e));
 		}
 		return HbFalse;
 	}
@@ -162,9 +162,9 @@ void HbMem_Tag_Free(void * const buffer) {
 	HbReport_Assert_Assume(buffer != NULL);
 	HbMem_Tag_Allocation * const allocation = (HbMem_Tag_Allocation *) buffer - 1;
 
-	HbMem_Tag * const tag = allocation->tag_r;
+	HbMem_Tag * const tag = allocation->tag_e;
 	HbPara_Mutex_Lock(&tag->allocationMutex_r);
-	HbList_2Way_Unlink(allocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
+	HbList_2WayLine_Unlink(allocation, tag->allocationFirst_r, tag->allocationLast_r, tagAllocationPrev_r, tagAllocationNext_r);
 	tag->allocationTotalSize_r -= allocation->size_r;
 	HbPara_Mutex_Unlock(&tag->allocationMutex_r);
 
@@ -197,18 +197,17 @@ size_t HbMem_DynArray_GetCapacityForGrowingExplicit(size_t const elementSize, si
 	}
 	#endif
 	// Don't do many reallocations in the beginning if elements are tiny.
-	return HbMath_MaxSize(neededSize + addition, HbMem_Tag_RecommendedMinAlloc / elementSize);
+	return HbMath_Max_Size(neededSize + addition, HbMem_Tag_RecommendedMinAlloc / elementSize);
 }
 
 void HbMem_DynArray_ReserveExactly(HbMem_DynArray * const array, size_t const capacity, HbBool const trim) {
 	HbReport_Assert_Assume(array != NULL);
-	size_t const neededCapacity = HbMath_MaxSize(capacity, array->count_r);
+	size_t const neededCapacity = HbMath_Max_Size(capacity, array->count_r);
 	if (neededCapacity == array->capacity_r || (!trim && neededCapacity < array->capacity_r)) {
 		return;
 	}
 	#ifdef HbMem_SizeMaxChecksNeeded
 	size_t const maxCapacity = SIZE_MAX / array->elementSize_r;
-	HbReport_Assert_Checked(neededCapacity <= maxCapacity);
 	if (neededCapacity > maxCapacity) {
 		HbReport_Crash("Too many elements of size %zu requested (%zu, max %zu) for the array created at %s:%u.",
 		               array->elementSize_r, neededCapacity, maxCapacity, array->originNameImmutable_r, array->originLocation_r);
@@ -221,7 +220,7 @@ void HbMem_DynArray_ReserveExactly(HbMem_DynArray * const array, size_t const ca
 			HbMem_Tag_ReallocElementsExplicit((void * *) &array->data_r, array->elementSize_r, neededCapacity, HbTrue);
 		}
 	} else {
-		array->data_r = HbMem_Tag_AllocElementsExplicit(array->tag_r, array->elementSize_r, neededCapacity, HbTrue,
+		array->data_r = HbMem_Tag_AllocElementsExplicit(array->tag_e, array->elementSize_r, neededCapacity, HbTrue,
 		                                                array->originNameImmutable_r, array->originLocation_r);
 	}
 	array->capacity_r = neededCapacity;

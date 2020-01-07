@@ -12,7 +12,7 @@ size_t HbTextA_FormatLengthV(char const * const format, va_list const arguments)
 	// vsnprintf returns a negative value in case of a format error.
 	signed const length = vsnprintf(NULL, 0, format, arguments);
 	HbReport_Assert_Checked(length >= 0);
-	return (size_t) HbMath_MaxS(length, 0);
+	return (size_t) HbMath_Max_S(length, 0);
 }
 
 size_t HbTextA_FormatLength(char const * const format, ...) {
@@ -34,7 +34,7 @@ size_t HbTextA_FormatV(char * const target, size_t const targetBufferSize, size_
 	// vsnprintf returns a negative value in case of a format error without writing anything, treat that as nothing written.
 	signed const length = vsnprintf(targetWithOffset, targetBufferRemaining, format, arguments);
 	HbReport_Assert_Checked(length >= 0);
-	size_t const written = HbMath_MinSize((size_t) HbMath_MaxS(length, 0), targetBufferRemaining - 1);
+	size_t const written = HbMath_Min_Size((size_t) HbMath_Max_S(length, 0), targetBufferRemaining - 1);
 	// Terminate in case the text was too long or there was a format error.
 	targetWithOffset[written] = '\0';
 	return written;
@@ -205,7 +205,7 @@ HbTextU32 HbTextU16_NextCharInBuffer(HbTextU16 const * * const cursor, size_t co
 		return '\0';
 	}
 	++(*cursor);
-	HbTextU16 const first = swapEndian ? HbByteSwapU16(firstUnswapped) : firstUnswapped;
+	HbTextU16 const first = swapEndian ? HbByteSwap_U16(firstUnswapped) : firstUnswapped;
 	HbTextU32 character;
 	if ((first >> 10) == (0xD800 >> 10)) {
 		if (maxElems < 2) {
@@ -217,7 +217,7 @@ HbTextU32 HbTextU16_NextCharInBuffer(HbTextU16 const * * const cursor, size_t co
 		}
 		++(*cursor);
 		if (swapEndian) {
-			second = HbByteSwapU16(second);
+			second = HbByteSwap_U16(second);
 		}
 		character = ((HbTextU32) (first & 0x3FF) << 10) | (second & 0x3FF);
 	} else {
@@ -240,11 +240,11 @@ size_t HbTextU16_WriteValidChar(HbTextU16 * const target, size_t const targetBuf
 		}
 		HbTextU16 const surrogate1 = (HbTextU16) (0xD800 | ((character >> 10) - (0x10000 >> 10)));
 		HbTextU16 const surrogate2 = (HbTextU16) (0xDC00 | (character & 0x3FF));
-		targetWithOffset[0] = swapEndian ? HbByteSwapU16(surrogate1) : surrogate1;
-		targetWithOffset[1] = swapEndian ? HbByteSwapU16(surrogate2) : surrogate2;
+		targetWithOffset[0] = swapEndian ? HbByteSwap_U16(surrogate1) : surrogate1;
+		targetWithOffset[1] = swapEndian ? HbByteSwap_U16(surrogate2) : surrogate2;
 		return 2;
 	}
-	targetWithOffset[0] = swapEndian ? HbByteSwapU16((HbTextU16) character) : (HbTextU16) character;
+	targetWithOffset[0] = swapEndian ? HbByteSwap_U16((HbTextU16) character) : (HbTextU16) character;
 	return 1;
 }
 

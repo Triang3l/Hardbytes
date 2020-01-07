@@ -31,18 +31,18 @@ inline void HbMem_Tag_Root_Init(HbMem_Tag_Root * const tagRoot) {
 void HbMem_Tag_Root_Shutdown(HbMem_Tag_Root * const tagRoot);
 
 typedef struct HbAligned(HbPlatform_AllocAlignment) HbMem_Tag_Allocation {
-	struct HbMem_Tag * tag_r;
-	struct HbMem_Tag_Allocation * tagAllocationPrev_r; // Lock tag_r->allocationMutex_r.
-	struct HbMem_Tag_Allocation * tagAllocationNext_r; // Lock tag_r->allocationMutex_r.
+	struct HbMem_Tag * tag_e;
+	struct HbMem_Tag_Allocation * tagAllocationPrev_r; // Lock tag_e->allocationMutex_r.
+	struct HbMem_Tag_Allocation * tagAllocationNext_r; // Lock tag_e->allocationMutex_r.
 	size_t size_r;
 	char const * originNameImmutable_r; // Function name generally, but can be something else (like, a library only providing file names).
 	unsigned originLocation_r; // File line generally.
 } HbMem_Tag_Allocation;
 
 typedef struct HbMem_Tag {
-	HbMem_Tag_Root * tagRoot_r;
-	struct HbMem_Tag * tagPrev_r; // Lock tagRoot_r->tagListMutex_r.
-	struct HbMem_Tag * tagNext_r; // Lock tagRoot_r->tagListMutex_r.
+	HbMem_Tag_Root * tagRoot_e;
+	struct HbMem_Tag * tagPrev_r; // Lock tagRoot_e->tagListMutex_r.
+	struct HbMem_Tag * tagNext_r; // Lock tagRoot_e->tagListMutex_r.
 	HbPara_Mutex allocationMutex_r;
 	HbMem_Tag_Allocation * allocationFirst_r; // Lock allocationMutex_r.
 	HbMem_Tag_Allocation * allocationLast_r; // Lock allocationMutex_r.
@@ -88,7 +88,7 @@ typedef struct HbMem_DynArray {
 	size_t elementSize_r;
 	size_t capacity_r;
 	size_t count_r;
-	HbMem_Tag * tag_r;
+	HbMem_Tag * tag_e;
 	char const * originNameImmutable_r;
 	unsigned originLocation_r;
 } HbMem_DynArray;
@@ -101,7 +101,7 @@ HbForceInline void HbMem_DynArray_InitExplicit(HbMem_DynArray * const array, siz
 	array->elementSize_r = elementSize;
 	array->capacity_r = 0;
 	array->count_r = 0;
-	array->tag_r = tag;
+	array->tag_e = tag;
 	array->originNameImmutable_r = originNameImmutable;
 	array->originLocation_r = originLocation;
 }
@@ -155,7 +155,6 @@ inline void HbMem_DynArray_MakeGapInUnsorted(HbMem_DynArray * const array, size_
 	if (array->capacity_r - array->count_r < count) {
 		#ifdef HbMem_SizeMaxChecksNeeded
 		size_t const countValuesLeft = SIZE_MAX / array->elementSize_r - array->count_r;
-		HbReport_Assert_Checked(countValuesLeft >= count);
 		if (countValuesLeft < count) {
 			HbReport_Crash("Too many elements of size %zu requested (%zu, max %zu) for insertion into the array created at %s:%u.",
 			               array->elementSize_r, count, countValuesLeft, array->originNameImmutable_r, array->originLocation_r);
@@ -163,7 +162,7 @@ inline void HbMem_DynArray_MakeGapInUnsorted(HbMem_DynArray * const array, size_
 		#endif
 		HbMem_DynArray_ReserveForGrowing(array, array->count_r + count);
 	}
-	size_t const countToMove = HbMath_MinSize(count, array->count_r - offset);
+	size_t const countToMove = HbMath_Min_Size(count, array->count_r - offset);
 	array->count_r += count;
 	if (countToMove != 0) { // May even have an empty array at this point (if count is zero), and memcpy is undefined for NULL.
 		memcpy((HbByte *) array->data_r + array->elementSize_r * (array->count_r - countToMove),
@@ -178,7 +177,6 @@ inline void HbMem_DynArray_MakeGapInSorted(HbMem_DynArray * const array, size_t 
 	if (array->capacity_r - array->count_r < count) {
 		#ifdef HbMem_SizeMaxChecksNeeded
 		size_t const countValuesLeft = SIZE_MAX / array->elementSize_r - array->count_r;
-		HbReport_Assert_Checked(countValuesLeft >= count);
 		if (countValuesLeft < count) {
 			HbReport_Crash("Too many elements of size %zu requested (%zu, max %zu) for insertion into the array created at %s:%u.",
 			               array->elementSize_r, count, countValuesLeft, array->originNameImmutable_r, array->originLocation_r);
@@ -200,7 +198,6 @@ inline size_t HbMem_DynArray_Append(HbMem_DynArray * const array, size_t const c
 	if (array->capacity_r - array->count_r < count) {
 		#ifdef HbMem_SizeMaxChecksNeeded
 		size_t const countValuesLeft = SIZE_MAX / array->elementSize_r - array->count_r;
-		HbReport_Assert_Checked(countValuesLeft >= count);
 		if (countValuesLeft < count) {
 			HbReport_Crash("Too many elements of size %zu requested (%zu, max %zu) for appending to the array created at %s:%u.",
 			               array->elementSize_r, count, countValuesLeft, array->originNameImmutable_r, array->originLocation_r);
@@ -215,7 +212,7 @@ inline void HbMem_DynArray_RemoveFromUnsorted(HbMem_DynArray * const array, size
 	HbReport_Assert_Assume(array != NULL);
 	HbReport_Assert_Assume(offset <= array->count_r);
 	HbReport_Assert_Assume(count <= array->count_r - offset);
-	size_t const countToMove = HbMath_MinSize(count, array->count_r - (offset + count));
+	size_t const countToMove = HbMath_Min_Size(count, array->count_r - (offset + count));
 	if (countToMove != 0) {
 		memcpy((HbByte *) array->data_r + array->elementSize_r * offset,
 		       (HbByte *) array->data_r + array->elementSize_r * (array->count_r - countToMove),
@@ -243,13 +240,13 @@ HbForceInline void HbMem_DynArray_RemoveFromEnd(HbMem_DynArray * const array, si
 	array->count_r -= count;
 }
 
-HbForceInline void const * HbMem_DynArray_GetExplicitC(HbMem_DynArray const * const array, size_t const index) {
+HbForceInline void const * HbMem_DynArray_GetExplicit(HbMem_DynArray const * const array, size_t const index) {
 	HbReport_Assert_Assume(array != NULL && "Dynamic-length array must not be NULL. Additionally, this is triggered when GetC is called with a mismatching type size.");
 	HbReport_Assert_Assume(index < array->count_r);
 	return (HbByte const *) array->data_r + array->elementSize_r * index;
 }
 
-HbForceInline void * HbMem_DynArray_GetExplicit(HbMem_DynArray * const array, size_t const index) {
+HbForceInline void * HbMem_DynArray_GetMutExplicit(HbMem_DynArray * const array, size_t const index) {
 	HbReport_Assert_Assume(array != NULL && "Dynamic-length array must not be NULL. Additionally, this is triggered when Get is called with a mismatching type size.");
 	HbReport_Assert_Assume(index < array->count_r);
 	return (HbByte *) array->data_r + array->elementSize_r * index;
@@ -259,12 +256,43 @@ HbForceInline void * HbMem_DynArray_GetExplicit(HbMem_DynArray * const array, si
 // When assertions are enabled, the size is also checked.
 // Returning a pointer to the element.
 #ifdef HbReport_Build_Assert
-#define HbMem_DynArray_GetC(array, index, elementType) ((elementType const *) HbMem_DynArray_GetExplicitC((array) != NULL && (array)->elementSize_r == sizeof(elementType) ? (array) : NULL, index)
-#define HbMem_DynArray_Get(array, index, elementType) ((elementType *) HbMem_DynArray_GetExplicit((array) != NULL && (array)->elementSize_r == sizeof(elementType) ? (array) : NULL, index)
+#define HbMem_DynArray_Get(array, index, elementType) ((elementType const *) HbMem_DynArray_GetExplicit((array) != NULL && (array)->elementSize_r == sizeof(elementType) ? (array) : NULL, index))
+#define HbMem_DynArray_GetMut(array, index, elementType) ((elementType *) HbMem_DynArray_GetMutExplicit((array) != NULL && (array)->elementSize_r == sizeof(elementType) ? (array) : NULL, index))
 #else
-#define HbMem_DynArray_GetC(array, index, elementType) (((elementType const *) (array)->data_r)[index])
-#define HbMem_DynArray_Get(array, index, elementType) (((elementType *) (array)->data_r)[index])
+#define HbMem_DynArray_Get(array, index, elementType) (((elementType const *) (array)->data_r)[index])
+#define HbMem_DynArray_GetMut(array, index, elementType) (((elementType *) (array)->data_r)[index])
 #endif
+
+/***********************************************
+ * Fibonacci number-sized block buddy allocator
+ ***********************************************/
+
+extern size_t const HbMem_FibAlloc_Sizes[]; // 1, 2, 3, 5... the largest not above SIZE_MAX.
+
+size_t HbMem_FibAlloc_ClosestLevelRoundingDown(size_t const size);
+size_t HbMem_FibAlloc_ClosestLevelRoundingUp(size_t const size);
+
+// The main purpose of this allocator is allocation not of individual items, but of pools size of which may vary.
+// Because of fixed allocation sizes, there's a lot of fragmentation that can't be filled later. So, allocation size is "soft".
+// Instead of giving the exact amount requested, the allocator will, in the best case, return the needed amount *plus fragmentation padding*.
+// If there's no free block of such size, it will try to give the largest possible block not smaller than the minimum needed size.
+
+typedef struct HbMem_FibAlloc {
+	size_t largestLevel_r;
+	HbMem_DynArray /* <HbMem_FibAlloc_Node_i> */ nodes_i; // Stable indices, recycling when both children are empty. [0] is the root.
+	size_t lastRecycledNodeIndex_i; // SIZE_MAX if no deallocated nodes.
+	struct HbMem_FibAlloc_FreeList_i * freeLists_i; // [largestLevel_r + 1], the last element contains the whole tree as the larger child if the tree is empty.
+} HbMem_FibAlloc;
+
+void HbMem_FibAlloc_InitExplicit(HbMem_FibAlloc * const fibAlloc, size_t const largestLevel, HbMem_Tag * const tag,
+                                 char const * const originNameImmutable, unsigned const originLocation);
+#define HbMem_FibAlloc_Init(fibAlloc, largestLevel, tag) HbMem_FibAlloc_InitExplicit(fibAlloc, largestLevel, tag, __func__, __LINE__)
+void HbMem_FibAlloc_Shutdown(HbMem_FibAlloc * const fibAlloc);
+
+#define HbMem_FibAlloc_Alloc_Failed SIZE_MAX
+// If the minimum and the preferred counts are not equal, it's required to provide a valid pointer to the output level of the size.
+size_t HbMem_FibAlloc_Alloc(HbMem_FibAlloc * const fibAlloc, size_t const minimumCount, size_t const preferredCount, size_t * const allocationLevelOut);
+void HbMem_FibAlloc_Free(HbMem_FibAlloc * const fibAlloc, size_t const allocation);
 
 #ifdef __cplusplus
 }

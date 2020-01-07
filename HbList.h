@@ -5,9 +5,11 @@
 extern "C" {
 #endif
 
+// "Line" means null-terminated rather than looped.
+
 // Prepend(element, first, last, prev, next) == Append(element, last, first, next, prev), but separate for cleaner assertions.
 
-#define HbList_2Way_Prepend(elementPointer, firstPointer, lastPointer, prevField, nextField)\
+#define HbList_2WayLine_Prepend(elementPointer, firstPointer, lastPointer, prevField, nextField)\
 do {\
 	(elementPointer)->prevField = NULL;\
 	(elementPointer)->nextField = (firstPointer);\
@@ -22,7 +24,7 @@ do {\
 	(firstPointer) = (elementPointer);\
 } while (HbFalse)
 
-#define HbList_2Way_Append(elementPointer, firstPointer, lastPointer, prevField, nextField)\
+#define HbList_2WayLine_Append(elementPointer, firstPointer, lastPointer, prevField, nextField)\
 do {\
 	(elementPointer)->prevField = (lastPointer);\
 	(elementPointer)->nextField = NULL;\
@@ -37,7 +39,7 @@ do {\
 	(lastPointer) = (elementPointer);\
 } while (HbFalse)
 
-#define HbList_2Way_Unlink(elementPointer, firstPointer, lastPointer, prevField, nextField)\
+#define HbList_2WayLine_Unlink(elementPointer, firstPointer, lastPointer, prevField, nextField)\
 do {\
 	if ((elementPointer)->prevField != NULL) {\
 		HbReport_Assert_Assume((firstPointer) != (elementPointer));\

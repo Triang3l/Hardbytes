@@ -17,6 +17,7 @@
 // - wchar_t - never! Only Windows, where WCHAR (without wchar.h) can be used for internal strings, or reinterpreting can be done between WCHAR and the engine's UTF-16 text.
 // Struct/union member suffixes:
 // - _r - can be read directly externally, but not set without a proper setter (mutex locking may also be required).
+// - _e - a reference to some component owned externally (and usually explicitly provided to the initialization function), externally read-only.
 // - _i - internal to the subsystem the structure is a part of. May also apply to entire types when all references to them are _i.
 
 #include <stdarg.h>
@@ -144,9 +145,9 @@ extern "C" {
 
 // Byte swap.
 #if defined(HbPlatform_Compiler_VisualC)
-#define HbByteSwapU16 _byteswap_ushort
-#define HbByteSwapU32 _byteswap_ulong
-#define HbByteSwapU64 _byteswap_uint64
+#define HbByteSwap_U16 _byteswap_ushort
+#define HbByteSwap_U32 _byteswap_ulong
+#define HbByteSwap_U64 _byteswap_uint64
 #else
 #error HbByteSwap: No implementation for the current compiler.
 #endif

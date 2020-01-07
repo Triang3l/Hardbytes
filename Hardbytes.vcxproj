@@ -133,6 +133,7 @@
     <ClInclude Include="HbMem.h" />
     <ClInclude Include="HbPara.h" />
     <ClInclude Include="HbReport.h" />
+    <ClInclude Include="HbSort.h" />
     <ClInclude Include="HbText.h" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HbMem.c" />
+    <ClCompile Include="HbMem_FibAlloc.c" />
     <ClCompile Include="HbReport.c" />
     <ClCompile Include="HbReport_OS_Microsoft.c" />
     <ClCompile Include="HbReport_OS_Microsoft_Profile.cpp" />

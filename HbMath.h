@@ -20,11 +20,11 @@ extern "C" {
 
 // Aligning values.
 #define HbMath_Align(value, alignment) (((value) + ((alignment) - 1u)) & ~((alignment) - 1u))
-HbForceInline unsigned HbMath_AlignU(unsigned const value, unsigned const alignment) {
+HbForceInline unsigned HbMath_Align_U(unsigned const value, unsigned const alignment) {
 	unsigned const mask = alignment - 1;
 	return (value + mask) & ~mask;
 }
-HbForceInline size_t HbMath_AlignSize(size_t const value, size_t const alignment) {
+HbForceInline size_t HbMath_Align_Size(size_t const value, size_t const alignment) {
 	size_t const mask = alignment - 1;
 	return (value + mask) & ~mask;
 }
@@ -32,18 +32,18 @@ HbForceInline size_t HbMath_AlignSize(size_t const value, size_t const alignment
 // Min/max - for runtime floating-point, use fmin/fmax because of NaN handling and minss/maxss.
 // The generic versions are for compile-time constants primarily because they evaluate arguments multiple times.
 #define HbMath_Min(a, b) ((a) < (b) ? (a) : (b))
-HbForceInline unsigned HbMath_MinU(unsigned const a, unsigned const b) { return HbMath_Min(a, b); }
-HbForceInline signed HbMath_MinS(signed const a, signed const b) { return HbMath_Min(a, b); }
-HbForceInline size_t HbMath_MinSize(size_t const a, size_t const b) { return HbMath_Min(a, b); }
+HbForceInline unsigned HbMath_Min_U(unsigned const a, unsigned const b) { return HbMath_Min(a, b); }
+HbForceInline signed HbMath_Min_S(signed const a, signed const b) { return HbMath_Min(a, b); }
+HbForceInline size_t HbMath_Min_Size(size_t const a, size_t const b) { return HbMath_Min(a, b); }
 #define HbMath_Max(a, b) ((a) > (b) ? (a) : (b))
-HbForceInline unsigned HbMath_MaxU(unsigned const a, unsigned const b) { return HbMath_Max(a, b); }
-HbForceInline signed HbMath_MaxS(signed const a, signed const b) { return HbMath_Max(a, b); }
-HbForceInline size_t HbMath_MaxSize(size_t const a, size_t const b) { return HbMath_Max(a, b); }
+HbForceInline unsigned HbMath_Max_U(unsigned const a, unsigned const b) { return HbMath_Max(a, b); }
+HbForceInline signed HbMath_Max_S(signed const a, signed const b) { return HbMath_Max(a, b); }
+HbForceInline size_t HbMath_Max_Size(size_t const a, size_t const b) { return HbMath_Max(a, b); }
 #define HbMath_Clamp(value, low, high) (((value) > (high)) ? (high) : (((value) < (low)) ? (low) : (value)))
-HbForceInline unsigned HbMath_ClampU(unsigned const value, unsigned const low, unsigned const high) { return HbMath_Clamp(value, low, high); }
-HbForceInline signed HbMath_ClampS(signed const value, signed const low, signed const high) { return HbMath_Clamp(value, low, high); }
-HbForceInline size_t HbMath_ClampSize(size_t const value, size_t const low, size_t const high) { return HbMath_Clamp(value, low, high); }
-#define HbMath_ClampF32(value, low, high) fminf(high, fmaxf(low, value))
+HbForceInline unsigned HbMath_Clamp_U(unsigned const value, unsigned const low, unsigned const high) { return HbMath_Clamp(value, low, high); }
+HbForceInline signed HbMath_Clamp_S(signed const value, signed const low, signed const high) { return HbMath_Clamp(value, low, high); }
+HbForceInline size_t HbMath_Clamp_Size(size_t const value, size_t const low, size_t const high) { return HbMath_Clamp(value, low, high); }
+#define HbMath_Clamp_F32(value, low, high) fminf(high, fmaxf(low, value))
 
 #ifdef __cplusplus
 }
