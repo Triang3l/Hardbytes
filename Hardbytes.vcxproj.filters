@@ -21,6 +21,9 @@
     <ClInclude Include="HbCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HbGPU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="HbList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -44,6 +47,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HbGPU.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="HbMem.c">
       <Filter>Source Files</Filter>
     </ClCompile>

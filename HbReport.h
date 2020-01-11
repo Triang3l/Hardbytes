@@ -28,6 +28,9 @@ extern "C" {
 #ifndef HbReport_Build_Profile
 #define HbReport_Build_Profile
 #endif
+#ifndef HbReport_Build_GPUDebug
+#define HbReport_Build_GPUDebug
+#endif
 #endif
 
 #ifdef HbReport_Build_Assert
